@@ -1,0 +1,47 @@
+
+# Entorno virtual
+venv/
+.env/
+.envrc
+
+# Archivos de Python compilados
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Archivos de log
+*.log
+
+# Archivos de configuración del IDE (Visual Studio Code, PyCharm, etc.)
+.vscode/
+.idea/
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Archivos de bases de datos temporales
+*.sqlite3
+
+# Archivos de salida
+*.out
+*.tmp
+
+# Archivos de dependencias si se generan automáticamente
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Tests (si generas archivos temporales)
+htmlcov/
+coverage.xml
+*.cover
+*.py,cover
+.cache
+nosetests.xml
+test-results/
+
+# Archivos específicos de Flask
+instance/
+*.db
+
+
