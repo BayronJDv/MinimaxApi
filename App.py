@@ -3,6 +3,11 @@ from minimax import minimax
 
 app = Flask(__name__)
 
+@app.route('/api/test', methods=['GET'])
+def test():
+    return jsonify({"message": "Hello World"})
+
+
 @app.route('/api/matriz', methods=['POST'])
 def index():
     datos = request.get_json()
@@ -12,7 +17,9 @@ def index():
     movimiento = minimax(matriz, dificultad)
     print("movimiento calculado")
     print(movimiento)
-    return jsonify({"movimiento": list(movimiento)})
+    return jsonify({"r": movimiento[0],
+    "c": movimiento[1]})
+
 
 if __name__ == '__main__':
     app.run(debug=True)

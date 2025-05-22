@@ -17,5 +17,7 @@ matriz = [[3, 4 ,3, 0, 0, 3, 3, 3],
         ]
 
 response = requests.post(url, json={"matriz": matriz,"dificultad": 2})
-movimiento = response.json().get('movimiento')
-print(movimiento)
+movimientor = response.json().get('r')
+movimientoc = response.json().get('c')
+print(movimientor)
+print(movimientoc)
