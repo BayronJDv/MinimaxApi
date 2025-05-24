@@ -1,7 +1,9 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from minimax import minimax
 
 app = Flask(__name__)
+CORS(app)  # Esto habilita CORS para todas las rutas
 
 @app.route('/api/test', methods=['GET'])
 def test():
