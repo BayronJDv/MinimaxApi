@@ -1,4 +1,4 @@
-from constantes import MOVIMIENTOS
+from constantes import MOVIMIENTOS, ZONAS
 import minimax
 import copy
 
@@ -71,7 +71,53 @@ class nodo:
         return False
 
     def calcular_utilidad(self):
-        self.utilidad = self.mapa.zonasIA - self.mapa.zonasJugador
+        # Zonas ganadas
+        ZV = self.mapa.zonasIA  # Verde (máquina)
+        ZR = self.mapa.zonasJugador  # Rojo (oponente)
+
+        # Casillas especiales pintadas SOLO en zonas NO capturadas aún
+        matriz = self.mapa.matriz
+        CVZ = 0  # Verde
+        CVR = 0  # Rojo
+        for zona in ZONAS:
+            puntosIA = 0
+            puntosJugador = 0
+            especiales_IA = []
+            especiales_R = []
+            for fila, col in zona:
+                val = matriz[fila][col]
+                if val == 4:
+                    puntosIA += 1
+                    especiales_IA.append((fila, col))
+                elif val == 5:
+                    puntosJugador += 1
+                    especiales_R.append((fila, col))
+                elif val == 1 and self.mapa.es_especial(fila, col):
+                    puntosIA += 1
+                    especiales_IA.append((fila, col))
+                elif val == 2 and self.mapa.es_especial(fila, col):
+                    puntosJugador += 1
+                    especiales_R.append((fila, col))
+            # Solo sumar las casillas especiales de zonas NO capturadas
+            if puntosIA < 3:
+                CVZ += len(especiales_IA)
+            if puntosJugador < 3:
+                CVR += len(especiales_R)
+
+        # Movilidad (número de movimientos válidos)
+        def contar_movilidad(pos, jugador):
+            movimientos = 0
+            for dx, dy in MOVIMIENTOS:
+                nx, ny = pos[0] + dx, pos[1] + dy
+                if self.es_movimiento_valido(nx, ny):
+                    movimientos += 1
+            return movimientos
+
+        MVZ = contar_movilidad(self.mapa.pos_1, 'verde') if self.mapa.pos_1 else 0
+        MVR = contar_movilidad(self.mapa.pos_2,     'rojo') if self.mapa.pos_2 else 0
+
+        # Fórmula de utilidad
+        self.utilidad = 100 * (ZV - ZR) + 10 * (CVZ - CVR) + 1 * (MVZ - MVR)
 
     def __str__(self):
         return f"Nodo( tipo :   {self.tipo}, utilidad : {self.utilidad}, profundidad : {self.profundidad},\n mapa : {self.mapa}) "
