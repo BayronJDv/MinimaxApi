@@ -19,8 +19,16 @@ def index():
     movimiento = minimax(matriz, dificultad)
     print("movimiento calculado")
     print(movimiento)
-    return jsonify({"r": movimiento[0],
-    "c": movimiento[1]})
+    # Obtener el estado del ganador usando el mapa resultante
+    mapa_resultante = mapa(matriz)
+    ganador = mapa_resultante.actualize()
+
+    return jsonify({
+        "r": movimiento[0],
+        "c": movimiento[1],
+        "ganador": ganador
+    })
+
 
 
 if __name__ == '__main__':
