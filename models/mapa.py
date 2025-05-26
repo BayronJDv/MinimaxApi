@@ -14,10 +14,19 @@ class mapa:
         return f"Mapa(\n matriz :\n{self.imprimir_matriz()},\n EspecialesDisponibles : {self.EspecialesDisponibles},\n pos_1 : {self.pos_1},\n pos_2 : {self.pos_2},\n zonasIA : {self.zonasIA},\n zonasJugador : {self.zonasJugador})"
 
     def actualize(self):
-        """Actualiza los atributos derivados de la matriz"""
+        """Actualiza los atributos derivados de la matriz y retorna el ganador si lo hay"""
         self.EspecialesDisponibles = self.detEspecialesdisponibles()
         self.pos_1, self.pos_2 = self.encontrar_posiciones()
         self.calcular_zonas_tomadas()
+        # Lógica para declarar el ganador
+        if self.zonasIA >= 3:
+            return 'verde'
+        elif self.zonasJugador >= 3:
+            return 'rojo'
+        elif self.zonasIA == 2 and self.zonasJugador == 2:
+            return 'empate'
+        else:
+            return None
 
     def detEspecialesdisponibles(self):
         disponibles = 0
