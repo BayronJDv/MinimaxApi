@@ -29,6 +29,7 @@ def index():
     # Obtener el estado del ganador usando el mapa resultante
     mapa_resultante = mapa(matriz)
     ganador = mapa_resultante.actualize()
+    print("ganador: ", ganador)
 
     return jsonify({
         "r": movimiento[0],

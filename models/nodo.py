@@ -17,6 +17,18 @@ class nodo:
         if self.profundidad == minimax.Dificultad:
             self.mapa.actualize()
             return
+            
+        # Verificar si hay un ganador o empate
+        resultado = self.mapa.actualize()
+        if resultado:
+            # Si hay un ganador o empate, actualizar la utilidad y detener la expansión
+            if resultado == 'verde':  # IA ganó
+                self.utilidad = float('inf') if self.tipo == 'max' else float('-inf')
+            elif resultado == 'rojo':  # Jugador ganó
+                self.utilidad = float('-inf') if self.tipo == 'max' else float('inf')
+            elif resultado == 'empate':
+                self.utilidad = 0  # Valor neutral para empate
+            return  # Detener la expansión
 
         x = self.mapa.pos_1[0] if self.tipo == 'max' else self.mapa.pos_2[0]
         y = self.mapa.pos_1[1] if self.tipo == 'max' else self.mapa.pos_2[1]            
