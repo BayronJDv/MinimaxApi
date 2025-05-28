@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from minimax import minimax
+from models.mapa import mapa
 import os
 
 app = Flask(__name__)

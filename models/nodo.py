@@ -7,7 +7,6 @@ class nodo:
     def __init__(self, padre, tipo, utilidad, mapa, profundidad):
         #estado actual del mapa
         self.mapa = mapa
-
         self.tipo = tipo
         self.padre = padre
         self.utilidad = float('-inf') if self.tipo == 'max' else float('inf')
