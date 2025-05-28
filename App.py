@@ -1,14 +1,20 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from minimax import minimax
+import os
 
 app = Flask(__name__)
-CORS(app)  # Esto habilita CORS para todas las rutas
 
-@app.route('/api/test', methods=['GET'])
-def test():
-    return jsonify({"message": "Hello World"})
+frontend_origin = os.environ.get("FRONTEND_ORIGIN")
 
+if frontend_origin:
+    CORS(app, resources={r"/*": {"origins": frontend_origin}})
+else:
+    CORS(app)
+
+@app.route("/")
+def home():
+    return "¡API Flask con CORS usando variables de entorno!"
 
 @app.route('/api/matriz', methods=['POST'])
 def index():
