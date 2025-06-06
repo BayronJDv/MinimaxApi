@@ -130,9 +130,9 @@ class nodo:
         else:
             # Etapa final: asegurar la última zona
             w_zonas = 100
-            w_casi = 5
+            w_casi = 0
             w_casillas = 30
-            w_mov = 0
+            w_mov = 1
 
         self.utilidad = (
             w_zonas * (ZV - ZR) +
