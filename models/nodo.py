@@ -14,22 +14,9 @@ class nodo:
 
     def expandirse(self, pila):
         #si se alcanza la profundidad maxima, calcular utilidad
-        if self.profundidad == minimax.Dificultad:
-            self.mapa.actualize()
+        if self.profundidad == minimax.Dificultad or self.termino_el_juego():
             return
             
-        # Verificar si hay un ganador o empate
-        resultado = self.mapa.actualize()
-        if resultado:
-            # Si hay un ganador o empate, actualizar la utilidad y detener la expansión
-            if resultado == 'verde':  # IA ganó
-                self.utilidad = float('inf') if self.tipo == 'max' else float('-inf')
-            elif resultado == 'rojo':  # Jugador ganó
-                self.utilidad = float('-inf') if self.tipo == 'max' else float('inf')
-            elif resultado == 'empate':
-                self.utilidad = 0  # Valor neutral para empate
-            return  # Detener la expansión
-
         x = self.mapa.pos_1[0] if self.tipo == 'max' else self.mapa.pos_2[0]
         y = self.mapa.pos_1[1] if self.tipo == 'max' else self.mapa.pos_2[1]            
 
@@ -52,13 +39,12 @@ class nodo:
                 nuevaProfundidad = self.profundidad + 1
                 nuevoMapa.actualize()
                 nuevoNodo = nodo(self, nuevotipo, 0, nuevoMapa, nuevaProfundidad)
-                if nuevoNodo.profundidad == minimax.Dificultad:
+                if nuevoNodo.profundidad == minimax.Dificultad or nuevoNodo.termino_el_juego():
                     nuevoNodo.calcular_utilidad()
-                #print("nuevo nodo :\n")
-                #print(nuevoNodo)
+
 
                 #si es hijo del nodo raiz (profundidad 0) lo agregamos a la lista de posibles movimientos
-                if self.profundidad == 0:
+                if self.profundidad == 0 :
                     minimax.PosiblesMovimientos.append(nuevoNodo)
                     
                 #agregamos el nuevo nodo a la lista de nodos y a la pila
@@ -69,54 +55,54 @@ class nodo:
         # Verificar que las coordenadas estén dentro del tablero
         filas = len(self.mapa.matriz)
         columnas = len(self.mapa.matriz[0]) if filas > 0 else 0
-        
+
         if (fila_destino < 0 or fila_destino >= filas or 
             col_destino < 0 or col_destino >= columnas):
             return False
-        
         valor_destino = self.mapa.matriz[fila_destino][col_destino]
-        
         if valor_destino == 0 or valor_destino == 3:
             return True
-        
         return False
 
     def calcular_utilidad(self):
-        # Zonas ganadas
-        ZV = self.mapa.zonasIA  # Verde (máquina)
-        ZR = self.mapa.zonasJugador  # Rojo (oponente)
+        ZV = self.mapa.zonasIA  # Zonas ganadas por la IA (verde)
+        ZR = self.mapa.zonasJugador  # Zonas ganadas por el rival (rojo)
 
-        # Casillas especiales pintadas SOLO en zonas NO capturadas aún
+        # Condición de victoria o derrota inmediata
+        if ZV >= 3:
+            self.utilidad = float('inf')
+            return
+        elif ZR >= 3:
+            self.utilidad = float('-inf')
+            return
+
         matriz = self.mapa.matriz
-        CVZ = 0  # Verde
-        CVR = 0  # Rojo
+        CVZ = 0  # Casillas especiales pintadas por IA en zonas no capturadas
+        CVR = 0  # Casillas especiales pintadas por rival en zonas no capturadas
+        zonas_casi_ganadas_ia = 0
+        zonas_casi_ganadas_rival = 0
+
         for zona in ZONAS:
             puntosIA = 0
             puntosJugador = 0
-            especiales_IA = []
-            especiales_R = []
             for fila, col in zona:
                 val = matriz[fila][col]
-                if val == 4:
+                if val == 4 or (val == 1 and self.mapa.es_especial(fila, col)):
                     puntosIA += 1
-                    especiales_IA.append((fila, col))
-                elif val == 5:
+                elif val == 5 or (val == 2 and self.mapa.es_especial(fila, col)):
                     puntosJugador += 1
-                    especiales_R.append((fila, col))
-                elif val == 1 and self.mapa.es_especial(fila, col):
-                    puntosIA += 1
-                    especiales_IA.append((fila, col))
-                elif val == 2 and self.mapa.es_especial(fila, col):
-                    puntosJugador += 1
-                    especiales_R.append((fila, col))
-            # Solo sumar las casillas especiales de zonas NO capturadas
             if puntosIA < 3:
-                CVZ += len(especiales_IA)
+                CVZ += puntosIA
             if puntosJugador < 3:
-                CVR += len(especiales_R)
+                CVR += puntosJugador
+            # Detecta zonas casi ganadas
+            if puntosIA == 2 and puntosJugador < 2:
+                zonas_casi_ganadas_ia += 1
+            if puntosJugador == 2 and puntosIA < 2:
+                zonas_casi_ganadas_rival += 1
 
         # Movilidad (número de movimientos válidos)
-        def contar_movilidad(pos, jugador):
+        def contar_movilidad(pos):
             movimientos = 0
             for dx, dy in MOVIMIENTOS:
                 nx, ny = pos[0] + dx, pos[1] + dy
@@ -124,11 +110,42 @@ class nodo:
                     movimientos += 1
             return movimientos
 
-        MVZ = contar_movilidad(self.mapa.pos_1, 'verde') if self.mapa.pos_1 else 0
-        MVR = contar_movilidad(self.mapa.pos_2,     'rojo') if self.mapa.pos_2 else 0
+        MVZ = contar_movilidad(self.mapa.pos_1) if self.mapa.pos_1 else 0
+        MVR = contar_movilidad(self.mapa.pos_2) if self.mapa.pos_2 else 0
 
-        # Fórmula de utilidad
-        self.utilidad = 100 * (ZV - ZR) + 10 * (CVZ - CVR) + 1 * (MVZ - MVR)
+        # Ajuste de pesos según etapa del juego
+        zonas_capturadas = ZV + ZR
+        if zonas_capturadas == 0:
+            # Etapa temprana: priorizar zonas casi ganadas
+            w_zonas = 100
+            w_casi = 30
+            w_casillas = 10
+            w_mov = 3
+        elif zonas_capturadas < 3:
+            # Etapa media: balance entre capturar zonas y asegurar casillas
+            w_zonas = 100
+            w_casi = 5
+            w_casillas = 20
+            w_mov = 2
+        else:
+            # Etapa final: asegurar la última zona
+            w_zonas = 100
+            w_casi = 5
+            w_casillas = 30
+            w_mov = 0
+
+        self.utilidad = (
+            w_zonas * (ZV - ZR) +
+            w_casi * (zonas_casi_ganadas_ia - zonas_casi_ganadas_rival) +
+            w_casillas * (CVZ - CVR) +
+            w_mov * (MVZ - MVR)
+        )
+
+
+    def termino_el_juego(self):
+        if self.mapa.zonasIA + self.mapa.zonasJugador == 4:
+            return True
+        return False
 
     def __str__(self):
         return f"Nodo( tipo :   {self.tipo}, utilidad : {self.utilidad}, profundidad : {self.profundidad},\n mapa : {self.mapa}) "

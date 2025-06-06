@@ -19,7 +19,7 @@ def minimax(MatrizMapa,dificultad):
     nodosExpandidos = 0
     NodoInicial = nodo(None, 'max', float('-inf'), mapa(MatrizMapa), 0)
     print("Nodo inicial:  -------------------")
-    print(NodoInicial.mapa)
+    print(NodoInicial)
     print("-----------------------------------")
     
     pila = deque()
