@@ -81,18 +81,12 @@ class nodo:
         
         return False
 
-    def calcular_zonas_ganadas(self):
-        """
-        Devuelve una tupla (ZV, ZR): zonas ganadas por IA (verde) y jugador (rojo)
-        """
-        ZV = self.mapa.zonasIA
-        ZR = self.mapa.zonasJugador
-        return ZV, ZR
+    def calcular_utilidad(self):
+        # Zonas ganadas
+        ZV = self.mapa.zonasIA  # Verde (máquina)
+        ZR = self.mapa.zonasJugador  # Rojo (oponente)
 
-    def casillas_especiales_no_capturadas(self):
-        """
-        Devuelve una tupla (CVZ, CVR): casillas especiales pintadas por IA y jugador en zonas NO capturadas aún
-        """
+        # Casillas especiales pintadas SOLO en zonas NO capturadas aún
         matriz = self.mapa.matriz
         CVZ = 0  # Verde
         CVR = 0  # Rojo
@@ -120,72 +114,21 @@ class nodo:
                 CVZ += len(especiales_IA)
             if puntosJugador < 3:
                 CVR += len(especiales_R)
-        return CVZ, CVR
 
-    # Añadir evaluación del progreso en cada zona
-    def evaluar_progreso_zonas(self):
-        progreso_IA = 0
-        progreso_jugador = 0
-        
-        for zona in ZONAS:
-            puntos_IA = sum(1 for fila, col in zona if 
-                        self.mapa.matriz[fila][col] in [1, 4] or 
-                        (self.mapa.matriz[fila][col] == 1 and self.mapa.es_especial(fila, col)))
-            puntos_jugador = sum(1 for fila, col in zona if 
-                            self.mapa.matriz[fila][col] in [2, 5] or 
-                            (self.mapa.matriz[fila][col] == 2 and self.mapa.es_especial(fila, col)))
-            
-            # Bonus por estar cerca de capturar (2/3 casillas especiales)
-            if puntos_IA == 2:
-                progreso_IA += 50  # Muy cerca de ganar zona
-            elif puntos_IA == 1:
-                progreso_IA += 20  # Progreso inicial
-                
-            if puntos_jugador == 2:
-                progreso_jugador += 50
-            elif puntos_jugador == 1:
-                progreso_jugador += 20
-        
-        return progreso_IA - progreso_jugador
+        # Movilidad (número de movimientos válidos)
+        def contar_movilidad(pos, jugador):
+            movimientos = 0
+            for dx, dy in MOVIMIENTOS:
+                nx, ny = pos[0] + dx, pos[1] + dy
+                if self.es_movimiento_valido(nx, ny):
+                    movimientos += 1
+            return movimientos
 
-    def calcular_movilidad(self, pos):
-        """
-        Devuelve el número de movimientos válidos para la posición dada.
-        """
-        movimientos = 0
-        for dx, dy in MOVIMIENTOS:
-            nx, ny = pos[0] + dx, pos[1] + dy
-            if self.es_movimiento_valido(nx, ny):
-                movimientos += 1
-        return movimientos
+        MVZ = contar_movilidad(self.mapa.pos_1, 'verde') if self.mapa.pos_1 else 0
+        MVR = contar_movilidad(self.mapa.pos_2,     'rojo') if self.mapa.pos_2 else 0
 
-
-    def evaluar_bloqueo_defensivo(self):
-        # Evaluar si se están bloqueando movimientos del oponente
-        pos_oponente = self.mapa.pos_2
-        
-        # Contar cuántos movimientos del oponente llevan a casillas especiales
-        movimientos_criticos_bloqueados = 0
-        for dx, dy in MOVIMIENTOS:
-            nx, ny = pos_oponente[0] + dx, pos_oponente[1] + dy
-            if (self.es_movimiento_valido(nx, ny) and 
-                self.mapa.es_especial(nx, ny)):
-                movimientos_criticos_bloqueados += 1
-        
-        return movimientos_criticos_bloqueados
-
-    def calcular_utilidad(self):
-        ZV, ZR = self.calcular_zonas_ganadas()
-        CVZ, CVR = self.casillas_especiales_no_capturadas()
-        MVZ = self.calcular_movilidad(self.mapa.pos_1) if self.mapa.pos_1 else 0
-        MVR = self.calcular_movilidad(self.mapa.pos_2) if self.mapa.pos_2 else 0
-        bloqueo = self.evaluar_bloqueo_defensivo()
-        progreso = self.evaluar_progreso_zonas()
-        self.utilidad = (1000 * (ZV - ZR) +           
-                    100 * progreso +               
-                    50 * (CVZ - CVR) +                      
-                    10 * bloqueo +                
-                    1 * (MVZ - MVR))
+        # Fórmula de utilidad
+        self.utilidad = 100 * (ZV - ZR) + 10 * (CVZ - CVR) + 1 * (MVZ - MVR)
 
     def __str__(self):
         return f"Nodo( tipo :   {self.tipo}, utilidad : {self.utilidad}, profundidad : {self.profundidad},\n mapa : {self.mapa}) "
