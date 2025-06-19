@@ -35,3 +35,18 @@ El tablero se representa como una matriz donde:
 ## Ejemplo de uso
 
 Puedes encontrar un ejemplo de cómo utilizar la API en el archivo `req.py`, que muestra cómo enviar una petición al servidor y procesar la respuesta.
+
+# Docker 
+puedes hacer pull de la imagen en docker hub con el siguiente comando:
+
+```bash
+docker pull bayronj/minimax-api
+```
+
+y ejecutar el contenedor con el siguiente comando:
+
+```bash
+docker run -it -p 5000:5000 bayronj/minimax-api
+```
+
+si todo funciona correctamente deberia ver el mensaje "todo funciona correctamente usa /api/matriz como se especifica en la documentacion"
