@@ -15,7 +15,7 @@ else:
 
 @app.route("/")
 def home():
-    return "¡API Flask con CORS usando variables de entorno!"
+    return "todo funciona correctamente usa /api/matriz como se especifica en la documentacion"
 
 @app.route('/api/matriz', methods=['POST'])
 def index():
@@ -40,4 +40,4 @@ def index():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000,debug=True)

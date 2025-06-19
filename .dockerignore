@@ -1,0 +1,25 @@
+# Carpetas de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Entornos virtuales
+venv/
+env/
+
+# Archivos sensibles o innecesarios
+*.env
+.env
+*.log
+*.sqlite3
+*.db
+
+# Git y otros sistemas de control de versiones
+.git/
+.gitignore
+
+# Archivos de configuración del sistema
+.DS_Store
+.vscode/
+.idea/
